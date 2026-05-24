@@ -365,6 +365,25 @@ def main():
         log.error("Vérifie FINANCEACADEMY_URL et les credentials dans .env")
         return
 
+    # Test Finnhub
+    if config.FINNHUB_API_KEY:
+        log.info("Test de connexion à Finnhub...")
+        try:
+            import requests as _req
+            r = _req.get(
+                "https://finnhub.io/api/v1/quote",
+                params={"symbol": "AAPL", "token": config.FINNHUB_API_KEY},
+                timeout=5,
+            )
+            if r.status_code == 200 and r.json().get("c"):
+                log.info(f"Finnhub OK | AAPL=${r.json()['c']:.2f}")
+            else:
+                log.warning(f"Finnhub: réponse inattendue ({r.status_code})")
+        except Exception as e:
+            log.warning(f"Finnhub inaccessible: {e} — news yfinance uniquement")
+    else:
+        log.warning("Finnhub: clé API non configurée — news yfinance uniquement")
+
     # Test LM Studio
     log.info("Test de connexion à LM Studio...")
     if agent.is_available():
