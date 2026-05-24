@@ -4,7 +4,8 @@ détection du régime marché (bull/bear/neutral), scoring des stocks.
 """
 import numpy as np
 import yfinance as yf
-from datetime import datetime
+import requests as _req
+from datetime import datetime, timedelta
 from bot.logger import get_logger
 import config
 
@@ -401,25 +402,70 @@ def _decide_regime(m: dict) -> str:
 
 # ── News récentes ────────────────────────────────────────────────────────────
 
+def _finnhub_news(ticker: str, days: int = 5, max_items: int = 3) -> list[str]:
+    """
+    Fetch les news Finnhub pour un ticker (source financière spécialisée).
+    Les stocks canadiens (.TO) sont convertis au format Finnhub.
+    """
+    key = config.FINNHUB_API_KEY
+    if not key:
+        return []
+    # Finnhub ne supporte pas le suffixe .TO — on essaie le ticker de base
+    symbol = ticker.split(".")[0].replace("-B", "").replace("-A", "")
+    today     = datetime.now()
+    from_date = (today - timedelta(days=days)).strftime("%Y-%m-%d")
+    to_date   = today.strftime("%Y-%m-%d")
+    try:
+        resp = _req.get(
+            "https://finnhub.io/api/v1/company-news",
+            params={"symbol": symbol, "from": from_date, "to": to_date, "token": key},
+            timeout=5,
+        )
+        if resp.status_code != 200:
+            return []
+        items = resp.json()
+        headlines = []
+        for item in items[:max_items]:
+            title  = item.get("headline", "")
+            source = item.get("source", "")
+            if title:
+                headlines.append(f"{title} [{source}]" if source else title)
+        return headlines
+    except Exception:
+        return []
+
+
 def get_news_for_tickers(tickers: list[str], max_per_ticker: int = 3) -> dict:
     """
-    Fetch les titres d'actualité récents pour une liste de tickers via yfinance.
-    Retourne {ticker: ["titre1 (source)", "titre2", ...]}
+    Fetch les actualités récentes pour une liste de tickers.
+    Priorité : Finnhub (finance spécialisée) + yfinance en complément.
+    Retourne {ticker: ["titre1 [source]", ...]}
     """
     news_map = {}
     for ticker in tickers:
-        try:
-            items = yf.Ticker(ticker).news or []
-            headlines = []
-            for item in items[:max_per_ticker]:
-                title = item.get("title", "")
-                pub   = item.get("publisher", "")
-                if title:
-                    headlines.append(f"{title} [{pub}]" if pub else title)
-            if headlines:
-                news_map[ticker] = headlines
-        except Exception:
-            pass
+        headlines = []
+
+        # Source 1 — Finnhub (agences Reuters, Bloomberg, etc.)
+        headlines.extend(_finnhub_news(ticker, days=5, max_items=max_per_ticker))
+
+        # Source 2 — Yahoo Finance en complément si Finnhub insuffisant
+        if len(headlines) < max_per_ticker:
+            try:
+                items = yf.Ticker(ticker).news or []
+                seen  = {h.split(" [")[0] for h in headlines}
+                for item in items:
+                    title = item.get("title", "")
+                    pub   = item.get("publisher", "")
+                    if title and title not in seen:
+                        headlines.append(f"{title} [{pub}]" if pub else title)
+                        seen.add(title)
+                    if len(headlines) >= max_per_ticker:
+                        break
+            except Exception:
+                pass
+
+        if headlines:
+            news_map[ticker] = headlines[:max_per_ticker]
     return news_map
 
 

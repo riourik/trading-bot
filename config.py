@@ -25,6 +25,9 @@ MAX_DAILY_LOSS_PCT   = float(os.getenv("MAX_DAILY_LOSS_PCT", "4.0"))
 DEFAULT_STOP_LOSS_PCT = float(os.getenv("DEFAULT_STOP_LOSS_PCT", "6.0"))
 TOP_STOCKS_COUNT     = int(os.getenv("TOP_STOCKS_COUNT", "20"))
 
+# ── Finnhub (news financières spécialisées) ──────────────────────────────────
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY", "")
+
 # ── Logging ───────────────────────────────────────────────────────────────────
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 LOG_FILE  = os.getenv("LOG_FILE", "/app/logs/bot.log")
