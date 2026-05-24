@@ -20,7 +20,7 @@ PRIORITY_US = [
     "CRWD","DDOG","NET","SNOW","PANW","ZS","OKTA","S","MDB","CFLT",
     "HUBS","MNDY","PATH","GTLB","SOUN","IONQ","AI",
     # Finance traditionnelle
-    "JPM","BAC","GS","V","MA","SQ","PYPL","CME","NDAQ",
+    "JPM","BAC","GS","V","MA","XYZ","PYPL","CME","NDAQ",
     # Santé / Biotech
     "LLY","UNH","ABBV","AMGN","VRTX","ISRG","CRSP","HIMS","ILMN","RXRX",
     # Énergie
@@ -48,7 +48,7 @@ PRIORITY_CA = [
     # Mines / Or
     "ABX.TO","WPM.TO","AEM.TO","CCO.TO","IVN.TO","LUN.TO","K.TO",
     # Crypto CA/US
-    "BITF.TO","HUT.TO","GLXY",
+    "BITF","HUT.TO","GLXY",
     # Transport / Industrie
     "CNR.TO","CP.TO","WSP.TO","MG.TO","TFII.TO","WCN.TO",
     # Commerce / Divers
