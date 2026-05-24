@@ -22,6 +22,14 @@ RÈGLES STRICTES:
 - Ne jamais acheter un stock dont le RSI > 75 (surachat extrême)
 - Vendre si une position perd > 8% (stop mental)
 
+PROCESSUS DE DÉCISION (à suivre avant chaque trade):
+1. ANALYSE MACRO : valide le régime marché avec VIX, SPY vs SMA200, Gold, DXY
+2. DÉBAT INTERNE : pour chaque candidat sérieux, pèse mentalement le cas HAUSSIER vs BAISSIER
+   - Cas HAUSSIER : momentum technique, secteur fort, catalyseurs positifs dans les news
+   - Cas BAISSIER : risques, news négatives, RSI élevé, tendance faible
+3. FILTRE NEWS : si une news récente annonce un risque majeur (procès, faillite, scandale), évite le titre même si le score technique est bon
+4. DÉCISION : n'achète que si le cas haussier est clairement dominant. En cas de doute → HOLD
+
 FORMAT DE RÉPONSE: Tu dois répondre UNIQUEMENT avec un JSON valide, sans texte avant ou après.
 Structure exacte requise:
 {
@@ -33,20 +41,22 @@ Structure exacte requise:
       "action": "buy|sell|hold",
       "ticker": "AAPL",
       "quantity_pct": 3.5,
-      "reasoning": "Une phrase d'explication.",
+      "reasoning": "Cas haussier: ... | Cas baissier: ... | Décision: ...",
       "stop_loss_pct": 6.0,
-      "take_profit_pct": 12.0
+      "take_profit_pct": 12.0,
+      "confidence": 7
     }
   ]
 }
 - quantity_pct = % de la valeur TOTALE du portfolio à allouer (ex: 3.5 = 3.5% du portfolio)
 - stop_loss_pct = % de baisse sous le prix d'achat pour déclencher le stop
 - take_profit_pct = % de hausse pour prendre les profits
+- confidence = score de confiance de 1 (faible) à 10 (très fort) — réduis quantity_pct si < 6
 - actions peut être vide [] si aucun trade n'est justifié
 """
 
 
-def _build_user_prompt(portfolio: dict, market: dict, candidates: list[dict]) -> str:
+def _build_user_prompt(portfolio: dict, market: dict, candidates: list[dict], news: dict = None) -> str:
     """Construit le message utilisateur avec tout le contexte."""
 
     # Résumé du marché
@@ -120,17 +130,32 @@ Positions ouvertes ({len(positions)}):
 
     cand_block = "\n".join(fmt_candidate(c) for c in candidates)
 
+    # Bloc news (seulement pour les candidats qui ont des news)
+    news_lines = []
+    if news:
+        for c in candidates:
+            ticker = c["ticker"]
+            headlines = news.get(ticker)
+            if headlines:
+                news_lines.append(f"  {ticker}:")
+                for h in headlines:
+                    news_lines.append(f"    • {h}")
+    news_block = ""
+    if news_lines:
+        news_block = "\n=== NEWS RÉCENTES (top candidats) ===\n" + "\n".join(news_lines) + "\n"
+
     task = f"""
 === CANDIDATS D'ACHAT (triés par score technique) ===
 {cand_block}
-
+{news_block}
 === TÂCHE ===
-Analyse le marché et le portfolio, puis fournis tes décisions de trading.
+Applique ton processus de décision (débat haussier/baissier + filtre news).
 Tiens compte:
 1. Du régime ({regime}) pour calibrer l'agressivité
 2. Des positions existantes (évite les doublons, surveille les pertes > 8%)
 3. De la liquidité disponible (${cash:,.0f} cash, {cash_pct}%)
 4. De la diversification sectorielle
+5. Des news récentes — une mauvaise news annule un bon score technique
 
 Réponds UNIQUEMENT avec le JSON demandé, sans texte supplémentaire.
 """
@@ -159,12 +184,12 @@ class LLMAgent:
         except Exception:
             return False
 
-    def decide(self, portfolio: dict, market: dict, candidates: list[dict]) -> dict | None:
+    def decide(self, portfolio: dict, market: dict, candidates: list[dict], news: dict = None) -> dict | None:
         """
         Envoie le contexte au LLM et retourne les décisions parsées.
         Retourne None en cas d'échec complet.
         """
-        user_prompt = _build_user_prompt(portfolio, market, candidates)
+        user_prompt = _build_user_prompt(portfolio, market, candidates, news=news)
 
         payload = {
             "model": self.model,

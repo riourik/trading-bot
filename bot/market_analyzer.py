@@ -399,6 +399,30 @@ def _decide_regime(m: dict) -> str:
     return "neutral"
 
 
+# ── News récentes ────────────────────────────────────────────────────────────
+
+def get_news_for_tickers(tickers: list[str], max_per_ticker: int = 3) -> dict:
+    """
+    Fetch les titres d'actualité récents pour une liste de tickers via yfinance.
+    Retourne {ticker: ["titre1 (source)", "titre2", ...]}
+    """
+    news_map = {}
+    for ticker in tickers:
+        try:
+            items = yf.Ticker(ticker).news or []
+            headlines = []
+            for item in items[:max_per_ticker]:
+                title = item.get("title", "")
+                pub   = item.get("publisher", "")
+                if title:
+                    headlines.append(f"{title} [{pub}]" if pub else title)
+            if headlines:
+                news_map[ticker] = headlines
+        except Exception:
+            pass
+    return news_map
+
+
 # ── Sélection des meilleurs candidats ────────────────────────────────────────
 
 def get_top_candidates(n: int = 20, regime: str = "neutral") -> list[dict]:

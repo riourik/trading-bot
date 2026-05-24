@@ -11,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from bot.api_client import FinanceAcademyClient
-from bot.market_analyzer import get_market_regime, get_top_candidates, analyze_ticker
+from bot.market_analyzer import get_market_regime, get_top_candidates, analyze_ticker, get_news_for_tickers
 from bot.llm_agent import LLMAgent
 from bot.risk_manager import RiskManager
 from bot.logger import get_logger
@@ -127,9 +127,18 @@ def run_trading_cycle():
         log.warning("Aucun candidat disponible, cycle annulé")
         return
 
-    # 7. Décision LLM
+    # 7. News récentes pour les top candidats
     try:
-        decision = agent.decide(portfolio, market, candidates)
+        top_tickers = [c["ticker"] for c in candidates[:15]]
+        news = get_news_for_tickers(top_tickers, max_per_ticker=3)
+        log.info(f"News récupérées pour {len(news)}/{len(top_tickers)} candidats")
+    except Exception as e:
+        log.warning(f"Impossible de récupérer les news: {e}")
+        news = {}
+
+    # 8. Décision LLM
+    try:
+        decision = agent.decide(portfolio, market, candidates, news=news)
     except Exception as e:
         log.error(f"Erreur agent LLM: {e}")
         return
@@ -138,7 +147,7 @@ def run_trading_cycle():
         log.warning("LLM n'a pas retourné de décision valide")
         return
 
-    # 8. Exécution des actions
+    # 9. Exécution des actions
     actions = decision.get("actions", [])
     log.info(f"LLM propose {len(actions)} action(s)")
 
