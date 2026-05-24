@@ -32,6 +32,9 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - LOG_FILE=/app/logs/bot.log
 
+      # ── Timezone ──────────────────────────────────────────────────────────
+      - TZ=UTC
+
     volumes:
       # Logs persistants sur le host
       - ./logs:/app/logs
