@@ -285,6 +285,43 @@ def end_of_day_summary():
         log.error(f"Erreur résumé journalier: {e}")
 
 
+def off_hours_analysis():
+    """
+    Analyse du marché hors-heures (toutes les 4h, 24/7).
+    Régime + top candidats pour anticiper l'ouverture.
+    """
+    if is_market_open():
+        return  # Le cycle principal gère déjà ça
+    now = datetime.now(EST)
+    mins = minutes_to_open()
+    log.info(f"=== ANALYSE HORS-MARCHÉ ({now.strftime('%H:%M')} EST | ouverture dans {mins} min) ===")
+    try:
+        market = get_market_regime()
+        regime = market.get("regime", "neutral")
+        vix    = market.get("vix", "?")
+        spy_ch = market.get("spy_change", "?")
+        gold_ch = market.get("gold_change", "?")
+        dxy    = market.get("dxy", "?")
+        log.info(f"Régime: {regime.upper()} | VIX={vix} | SPY={spy_ch:+}% | Or={gold_ch:+}% | DXY={dxy}")
+    except Exception as e:
+        log.error(f"Erreur analyse régime hors-marché: {e}")
+        regime = "neutral"
+        return
+
+    try:
+        candidates = get_top_candidates(n=10, regime=regime)
+        log.info(f"Top 10 candidats pré-calculés pour lundi:")
+        for c in candidates[:10]:
+            log.info(
+                f"  {c['ticker']:12} score={c['score']:5.1f} | "
+                f"RSI={c.get('rsi') or '?':>5} | "
+                f"MACD_hist={c.get('macd_hist') or '?':>7} | "
+                f"${c['price']:.2f}"
+            )
+    except Exception as e:
+        log.error(f"Erreur analyse candidats hors-marché: {e}")
+
+
 def hourly_job():
     """Job principal exécuté toutes les heures."""
     if is_market_open():
@@ -350,6 +387,15 @@ def main():
         id="main_cycle",
         name="Cycle de trading",
         next_run_time=datetime.now(EST),  # Exécute immédiatement au démarrage
+    )
+
+    # Analyse hors-marché toutes les 4h (régime + candidats, même le weekend)
+    scheduler.add_job(
+        off_hours_analysis,
+        IntervalTrigger(hours=4),
+        id="off_hours",
+        name="Analyse hors-marché",
+        next_run_time=datetime.now(EST) + timedelta(minutes=2),  # 2 min après démarrage
     )
 
     log.info(f"Scheduler démarré — cycle toutes les {config.CYCLE_INTERVAL_MIN} min")
