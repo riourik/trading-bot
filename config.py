@@ -16,7 +16,7 @@ LLM_API_KEY  = os.getenv("LLM_API_KEY", "lm-studio")
 LLM_TIMEOUT  = int(os.getenv("LLM_TIMEOUT", "120"))
 
 # ── Paramètres de trading ─────────────────────────────────────────────────────
-MAX_POSITION_PCT     = float(os.getenv("MAX_POSITION_PCT", "5.0"))
+MAX_POSITION_PCT     = float(os.getenv("MAX_POSITION_PCT", "15.0"))
 MAX_POSITIONS        = int(os.getenv("MAX_POSITIONS", "12"))
 MIN_CASH_PCT_BULL    = float(os.getenv("MIN_CASH_PCT_BULL", "10.0"))
 MIN_CASH_PCT_BEAR    = float(os.getenv("MIN_CASH_PCT_BEAR", "40.0"))

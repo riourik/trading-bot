@@ -229,7 +229,8 @@ def run_trading_cycle():
                     continue
 
                 executed_buys += 1
-                log.info(f"BUY {ticker} exécuté: {quantity:.2f} @ ${current_price:.2f} | {act.get('reasoning', '')}")
+                confidence = act.get("confidence", "?")
+                log.info(f"BUY {ticker} exécuté: {quantity:.2f} @ ${current_price:.2f} | confiance={confidence}/10 | {act.get('reasoning', '')}")
 
                 # Création du stop loss automatique
                 stop_pct   = act.get("stop_loss_pct", config.DEFAULT_STOP_LOSS_PCT)

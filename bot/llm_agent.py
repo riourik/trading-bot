@@ -13,10 +13,16 @@ log = get_logger(__name__)
 SYSTEM_PROMPT = """Tu es un trader quantitatif professionnel gérant un portfolio simulé en USD.
 Ton objectif est de maximiser les rendements tout en gérant le risque selon les conditions du marché.
 
-RÈGLES STRICTES:
-- Marché BULL : déployer jusqu'à 80% du capital, positions de 3-5% chacune
-- Marché BEAR : mode défensif, max 50% déployé, positions max 2-3%, préférer le cash
-- Marché NEUTRAL : approche modérée, 60-70% déployé, 2-4% par position
+CALIBRAGE PAR CONVICTION (confidence 1-10) — pense comme un humain qui gère $10,000:
+- Conviction FORTE (8-10)   : 10-15% du portfolio → seulement si TOUS les signaux sont alignés
+- Conviction MODÉRÉE (6-7)  : 5-8% du portfolio → bonne opportunité avec quelques réserves
+- Conviction FAIBLE (4-5)   : 2-4% du portfolio → position test ou spéculative
+- Conviction < 4             : ne pas acheter, HOLD
+
+RÈGLES PAR RÉGIME:
+- Marché BULL : déployer jusqu'à 85% du capital, 4-8 positions concentrées
+- Marché BEAR : mode défensif, max 50% déployé, conviction 6+ seulement, positions 2-5%
+- Marché NEUTRAL : 65-75% déployé, conviction 5+ seulement, 3-6% par position
 - Ne jamais détenir plus de 12 positions simultanément
 - Diversifier les secteurs (max 3 positions par secteur)
 - Ne jamais acheter un stock dont le RSI > 75 (surachat extrême)
@@ -48,10 +54,10 @@ Structure exacte requise:
     }
   ]
 }
-- quantity_pct = % de la valeur TOTALE du portfolio à allouer (ex: 3.5 = 3.5% du portfolio)
+- quantity_pct = % du portfolio total selon ta conviction: confidence 9 → 12-15%, confidence 7 → 6-8%, confidence 5 → 3-4%
 - stop_loss_pct = % de baisse sous le prix d'achat pour déclencher le stop
-- take_profit_pct = % de hausse pour prendre les profits
-- confidence = score de confiance de 1 (faible) à 10 (très fort) — réduis quantity_pct si < 6
+- take_profit_pct = % de hausse pour prendre les profits (vise au moins 2x le stop loss)
+- confidence = conviction 1-10 : doit être cohérent avec quantity_pct
 - actions peut être vide [] si aucun trade n'est justifié
 """
 
@@ -257,13 +263,15 @@ class LLMAgent:
                 log.warning(f"quantity_pct hors limites ({qty_pct}) pour {ticker}, corrigé à 3%")
                 qty_pct = 3.0
 
+            confidence = max(1, min(10, int(a.get("confidence", 5))))
             validated_actions.append({
-                "action":         action,
-                "ticker":         ticker,
-                "quantity_pct":   min(qty_pct, config.MAX_POSITION_PCT),
-                "reasoning":      str(a.get("reasoning", ""))[:200],
-                "stop_loss_pct":  float(a.get("stop_loss_pct", config.DEFAULT_STOP_LOSS_PCT)),
+                "action":          action,
+                "ticker":          ticker,
+                "quantity_pct":    min(qty_pct, config.MAX_POSITION_PCT),
+                "reasoning":       str(a.get("reasoning", ""))[:200],
+                "stop_loss_pct":   float(a.get("stop_loss_pct", config.DEFAULT_STOP_LOSS_PCT)),
                 "take_profit_pct": float(a.get("take_profit_pct", config.DEFAULT_STOP_LOSS_PCT * 2)),
+                "confidence":      confidence,
             })
 
         data["actions"] = validated_actions
