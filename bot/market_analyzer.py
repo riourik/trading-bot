@@ -12,14 +12,47 @@ log = get_logger(__name__)
 
 # Stocks prioritaires pour le bot (US + CA les plus liquides)
 PRIORITY_US = [
-    "AAPL","MSFT","NVDA","GOOGL","META","AMZN","TSLA","AMD","PLTR","COIN",
-    "MSTR","CRWD","DDOG","NET","SNOW","ARM","JPM","BAC","GS","V","MA",
-    "XOM","CVX","LLY","UNH","HD","COST","NFLX","UBER","SOFI",
-    "SPY","QQQ","GLD","XLF","XLK","XLE",
+    # Méga-cap US (core)
+    "AAPL","MSFT","NVDA","GOOGL","META","AMZN","TSLA","AMD","PLTR","ARM",
+    # Crypto / Finance haute volatilité
+    "COIN","MSTR","MARA","RIOT","CLSK","HOOD","SOFI","AFRM","UPST",
+    # Cybersec / Cloud / SaaS
+    "CRWD","DDOG","NET","SNOW","PANW","ZS","OKTA","S","MDB","CFLT",
+    "HUBS","MNDY","PATH","GTLB","SOUN","IONQ","AI",
+    # Finance traditionnelle
+    "JPM","BAC","GS","V","MA","SQ","PYPL","CME","NDAQ",
+    # Santé / Biotech
+    "LLY","UNH","ABBV","AMGN","VRTX","ISRG","CRSP","HIMS","ILMN","RXRX",
+    # Énergie
+    "XOM","CVX","COP","OXY","ENPH","FSLR","PLUG",
+    # Consumer / Retail / Loisirs
+    "HD","COST","NFLX","UBER","LYFT","DASH","DKNG","LULU","CELH","MNST",
+    "TGT","ROST","BKNG","ABNB","SBUX","QSR",
+    # Communication / Social
+    "RDDT","SNAP","PINS","ROKU","SPOT","RBLX","TTWO","EA",
+    # EV
+    "RIVN","NIO","XPEV",
+    # Industrie / Défense / Espace
+    "GE","CAT","BA","LMT","NOC","AXON","RKLB","BAH",
+    # ETFs (utiles pour bench + position refuge)
+    "SPY","QQQ","IWM","GLD","XLF","XLK","XLE","SOXX","XBI","ARKK",
 ]
 PRIORITY_CA = [
-    "SHOP.TO","RY.TO","TD.TO","CNQ.TO","SU.TO","ENB.TO","SHOP.TO",
-    "CSU.TO","ATD.TO","DOL.TO","ABX.TO","WPM.TO","CCO.TO","AEM.TO",
+    # Finance
+    "RY.TO","TD.TO","BNS.TO","CM.TO","NA.TO","BAM.TO","BN.TO",
+    "MFC.TO","FFH.TO","GWO.TO",
+    # Tech
+    "SHOP.TO","CSU.TO","TOI.TO","TRI.TO","KXS.TO","LSPD.TO",
+    # Énergie
+    "CNQ.TO","SU.TO","ENB.TO","CVE.TO","IMO.TO","ARX.TO","PPL.TO",
+    # Mines / Or
+    "ABX.TO","WPM.TO","AEM.TO","CCO.TO","IVN.TO","LUN.TO","K.TO",
+    # Crypto CA
+    "BITF.TO","HUT.TO","GLXY.TO",
+    # Transport / Industrie
+    "CNR.TO","CP.TO","WSP.TO","MG.TO","TFII.TO","WCN.TO",
+    # Commerce / Divers
+    "ATD.TO","DOL.TO","L.TO","MRU.TO",
 ]
 PRIORITY_TICKERS = PRIORITY_US + PRIORITY_CA
 
