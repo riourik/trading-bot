@@ -47,8 +47,10 @@ PRIORITY_CA = [
     "CNQ.TO","SU.TO","ENB.TO","CVE.TO","IMO.TO","ARX.TO","PPL.TO",
     # Mines / Or
     "ABX.TO","WPM.TO","AEM.TO","CCO.TO","IVN.TO","LUN.TO","K.TO",
+    # Tech
+    "TOI.TO",
     # Crypto CA/US
-    "BITF","HUT.TO","GLXY",
+    "BITF","HUT.TO","GLXY.TO",
     # Transport / Industrie
     "CNR.TO","CP.TO","WSP.TO","MG.TO","TFII.TO","WCN.TO",
     # Commerce / Divers
