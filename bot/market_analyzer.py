@@ -42,13 +42,13 @@ PRIORITY_CA = [
     "RY.TO","TD.TO","BNS.TO","CM.TO","NA.TO","BAM.TO","BN.TO",
     "MFC.TO","FFH.TO","GWO.TO",
     # Tech
-    "SHOP.TO","CSU.TO","TOI.TO","TRI.TO","KXS.TO","LSPD.TO",
+    "SHOP.TO","CSU.TO","TRI.TO","KXS.TO","LSPD.TO",
     # Énergie
     "CNQ.TO","SU.TO","ENB.TO","CVE.TO","IMO.TO","ARX.TO","PPL.TO",
     # Mines / Or
     "ABX.TO","WPM.TO","AEM.TO","CCO.TO","IVN.TO","LUN.TO","K.TO",
-    # Crypto CA
-    "BITF.TO","HUT.TO","GLXY.TO",
+    # Crypto CA/US
+    "BITF.TO","HUT.TO","GLXY",
     # Transport / Industrie
     "CNR.TO","CP.TO","WSP.TO","MG.TO","TFII.TO","WCN.TO",
     # Commerce / Divers
