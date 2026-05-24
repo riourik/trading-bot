@@ -1,0 +1,46 @@
+services:
+  trading-bot:
+    build: .
+    container_name: trading-bot
+    restart: unless-stopped
+
+    environment:
+      # ── Site de simulation ───────────────────────────────────────────────
+      - FINANCEACADEMY_URL=${FINANCEACADEMY_URL:-http://192.168.0.241:5000}
+      - BOT_EMAIL=${BOT_EMAIL:-bot@trading.com}
+      - BOT_PASSWORD=${BOT_PASSWORD:-BotTrading2024!}
+      - BOT_USERNAME=${BOT_USERNAME:-TradingBot}
+
+      # ── LM Studio (modifier l'IP selon ton réseau) ───────────────────────
+      - LLM_BASE_URL=${LLM_BASE_URL:-http://192.168.0.100:1234/v1}
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5-14b-instruct}
+      - LLM_API_KEY=${LLM_API_KEY:-lm-studio}
+      - LLM_TIMEOUT=${LLM_TIMEOUT:-120}
+
+      # ── Paramètres trading ────────────────────────────────────────────────
+      - MAX_POSITION_PCT=${MAX_POSITION_PCT:-5.0}
+      - MAX_POSITIONS=${MAX_POSITIONS:-12}
+      - MIN_CASH_PCT_BULL=${MIN_CASH_PCT_BULL:-10.0}
+      - MIN_CASH_PCT_BEAR=${MIN_CASH_PCT_BEAR:-40.0}
+      - MIN_CASH_PCT_NEUTRAL=${MIN_CASH_PCT_NEUTRAL:-20.0}
+      - MAX_DAILY_LOSS_PCT=${MAX_DAILY_LOSS_PCT:-4.0}
+      - DEFAULT_STOP_LOSS_PCT=${DEFAULT_STOP_LOSS_PCT:-6.0}
+      - TOP_STOCKS_COUNT=${TOP_STOCKS_COUNT:-20}
+      - CYCLE_INTERVAL_MIN=${CYCLE_INTERVAL_MIN:-60}
+
+      # ── Logging ───────────────────────────────────────────────────────────
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FILE=/app/logs/bot.log
+
+    volumes:
+      # Logs persistants sur le host
+      - ./logs:/app/logs
+
+    # Réseau host pour accéder à 192.168.0.241 et au PC LM Studio
+    network_mode: host
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
