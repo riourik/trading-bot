@@ -205,29 +205,43 @@ class LLMAgent:
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user",   "content": user_prompt},
             ],
-            "temperature": 0.3,    # Peu de créativité pour les décisions financières
-            "max_tokens":  2048,
+            "temperature": 0.3,
+            "max_tokens":  4096,   # Augmenté pour éviter les JSON tronqués
             "stream": False,
         }
 
         log.info(f"Envoi au LLM ({self.model})...")
-        try:
-            r = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers=self.headers,
-                json=payload,
-                timeout=config.LLM_TIMEOUT,
-            )
-            r.raise_for_status()
-            raw_content = r.json()["choices"][0]["message"]["content"].strip()
-            log.debug(f"Réponse LLM brute:\n{raw_content[:500]}")
-            return self._parse_response(raw_content)
-        except requests.Timeout:
-            log.error(f"LLM timeout après {config.LLM_TIMEOUT}s")
-            return None
-        except Exception as e:
-            log.error(f"Erreur LLM: {e}")
-            return None
+        for attempt in range(1, 3):  # Max 2 tentatives
+            try:
+                r = requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=self.headers,
+                    json=payload,
+                    timeout=config.LLM_TIMEOUT,
+                )
+                r.raise_for_status()
+                raw_content = r.json()["choices"][0]["message"]["content"].strip()
+                log.debug(f"Réponse LLM brute:\n{raw_content[:500]}")
+                result = self._parse_response(raw_content)
+                if result:
+                    return result
+                if attempt < 2:
+                    log.warning(f"JSON invalide (tentative {attempt}/2) — retry...")
+                    # Retry avec prompt simplifié pour forcer un JSON plus court
+                    payload["messages"][-1]["content"] = (
+                        user_prompt +
+                        "\n\nIMPORTANT: Limite tes actions à 3 maximum pour rester concis. "
+                        "Réponds UNIQUEMENT avec le JSON, sans texte."
+                    )
+            except requests.Timeout:
+                log.error(f"LLM timeout après {config.LLM_TIMEOUT}s (tentative {attempt}/2)")
+                if attempt >= 2:
+                    return None
+            except Exception as e:
+                log.error(f"Erreur LLM (tentative {attempt}/2): {e}")
+                if attempt >= 2:
+                    return None
+        return None
 
     def _parse_response(self, raw: str) -> dict | None:
         """Parse et valide le JSON retourné par le LLM."""
