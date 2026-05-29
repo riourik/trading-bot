@@ -48,7 +48,9 @@ PRIORITY_CA = [
     "CNQ.TO","SU.TO","ENB.TO","CVE.TO","IMO.TO","ARX.TO","PPL.TO",
     # Mines / Or
     "ABX.TO","WPM.TO","AEM.TO","CCO.TO","IVN.TO","LUN.TO","K.TO",
-    # Crypto CA/US (TOI.TO retiré: erreurs yfinance persistantes; GLXY.TO→GLXY migré NASDAQ 2025)
+    # Tech
+    "TOI.V",
+    # Crypto CA/US (GLXY.TO→GLXY migré NASDAQ 2025)
     "BITF","HUT.TO",
     # Transport / Industrie
     "CNR.TO","CP.TO","WSP.TO","MG.TO","TFII.TO","WCN.TO",
