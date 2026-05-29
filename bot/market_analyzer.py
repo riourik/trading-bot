@@ -15,10 +15,10 @@ log = get_logger(__name__)
 PRIORITY_US = [
     # Méga-cap US (core)
     "AAPL","MSFT","NVDA","GOOGL","META","AMZN","TSLA","AMD","PLTR","ARM",
-    # Crypto / Finance haute volatilité
-    "COIN","MSTR","MARA","RIOT","CLSK","HOOD","SOFI","AFRM","UPST",
-    # Cybersec / Cloud / SaaS
-    "CRWD","DDOG","NET","SNOW","PANW","ZS","OKTA","S","MDB","CFLT",
+    # Crypto / Finance haute volatilité (GLXY: Galaxy Digital migré NASDAQ 2025)
+    "COIN","MSTR","MARA","RIOT","CLSK","HOOD","SOFI","AFRM","UPST","GLXY",
+    # Cybersec / Cloud / SaaS (CFLT retiré: acquis par IBM déc. 2025)
+    "CRWD","DDOG","NET","SNOW","PANW","ZS","OKTA","S","MDB",
     "HUBS","MNDY","PATH","GTLB","SOUN","IONQ","AI",
     # Finance traditionnelle
     "JPM","BAC","GS","V","MA","XYZ","PYPL","CME","NDAQ",
@@ -48,10 +48,8 @@ PRIORITY_CA = [
     "CNQ.TO","SU.TO","ENB.TO","CVE.TO","IMO.TO","ARX.TO","PPL.TO",
     # Mines / Or
     "ABX.TO","WPM.TO","AEM.TO","CCO.TO","IVN.TO","LUN.TO","K.TO",
-    # Tech
-    "TOI.TO",
-    # Crypto CA/US
-    "BITF","HUT.TO","GLXY.TO",
+    # Crypto CA/US (TOI.TO retiré: erreurs yfinance persistantes; GLXY.TO→GLXY migré NASDAQ 2025)
+    "BITF","HUT.TO",
     # Transport / Industrie
     "CNR.TO","CP.TO","WSP.TO","MG.TO","TFII.TO","WCN.TO",
     # Commerce / Divers
