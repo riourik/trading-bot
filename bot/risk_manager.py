@@ -111,13 +111,19 @@ class RiskManager:
         positions = portfolio.get("positions", [])
 
         # Vérification du nombre max de positions
-        if len(positions) >= config.MAX_POSITIONS:
+        existing = next((p for p in positions if p["ticker"] == ticker), None)
+        if not existing and len(positions) >= config.MAX_POSITIONS:
             return False, f"Max positions atteint ({config.MAX_POSITIONS})"
 
-        # Position déjà ouverte sur ce ticker ?
-        existing = next((p for p in positions if p["ticker"] == ticker), None)
+        # Scale-in autorisé : vérifier que la position totale ne dépasse pas MAX_POSITION_PCT
         if existing:
-            return False, f"Position déjà ouverte sur {ticker}"
+            current_value = existing.get("current_value", existing.get("quantity", 0) * price)
+            new_total_pct  = (current_value + quantity * price) / total * 100
+            if new_total_pct > config.MAX_POSITION_PCT:
+                return False, (
+                    f"Scale-in refusé: position totale {new_total_pct:.1f}% "
+                    f"> max {config.MAX_POSITION_PCT}%"
+                )
 
         cost = quantity * price
         if cost > cash * 0.98:  # 2% de marge

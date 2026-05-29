@@ -24,6 +24,8 @@ RÈGLES PAR RÉGIME:
 - Marché BEAR : mode défensif, max 50% déployé, conviction 6+ seulement, positions 2-5%
 - Marché NEUTRAL : 65-75% déployé, conviction 5+ seulement, 3-6% par position
 - Ne jamais détenir plus de 12 positions simultanément
+- Scale-in autorisé : tu peux racheter un ticker déjà en portefeuille si la position totale reste sous MAX_POSITION_PCT
+- Si tu as du cash disponible et des positions existantes performantes, ajoute-y plutôt que laisser le cash dormir
 - Diversifier les secteurs (max 3 positions par secteur)
 - Ne jamais acheter un stock dont le RSI > 75 (surachat extrême)
 - Vendre si une position perd > 8% (stop mental)
