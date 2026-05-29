@@ -128,19 +128,20 @@ def run_trading_cycle():
         return
 
     # 7. News récentes pour les top candidats + positions ouvertes
+    # Limité à top 5 candidats + positions pour garder le prompt compact (timeout LLM)
     try:
-        top_tickers    = [c["ticker"] for c in candidates[:15]]
+        top_tickers    = [c["ticker"] for c in candidates[:5]]
         held_tickers   = [p["ticker"] for p in portfolio.get("positions", [])]
         all_news_tickers = list(dict.fromkeys(held_tickers + top_tickers))  # positions en priorité
-        news = get_news_for_tickers(all_news_tickers, max_per_ticker=3)
+        news = get_news_for_tickers(all_news_tickers, max_per_ticker=2)
         log.info(f"News récupérées pour {len(news)}/{len(all_news_tickers)} tickers (positions + candidats)")
     except Exception as e:
         log.warning(f"Impossible de récupérer les news: {e}")
         news = {}
 
-    # 8. Décision LLM
+    # 8. Décision LLM — on envoie top 10 candidats max pour réduire le prompt
     try:
-        decision = agent.decide(portfolio, market, candidates, news=news)
+        decision = agent.decide(portfolio, market, candidates[:10], news=news)
     except Exception as e:
         log.error(f"Erreur agent LLM: {e}")
         return
